@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h2>打砖块</h2>
+<canvas id="paly" width="800" height="600" style="border: 1px solid black ;background: url('background.png')"></canvas>
+<h3>玩法说明：</h3>
+<p>按键W发射小球，按键AD控制左右</p>
+<script>
+
+    var Game=function () {
+        var g = {
+            actions:{},
+            keyDowns:{},
+        };
+        var canvas = document.querySelector("#paly");
+        var context = canvas.getContext('2d');
+        g.canvas = canvas;
+        g.context = context;
+        g.clear=function () {
+            context.clearRect(0,0,canvas.width,canvas.height);
+        };
+        g.drawImaged=function (gimage) {
+            g.context.drawImage(gimage.image,gimage.x,gimage.y);
+        };
+        //even
+        window.addEventListener('keydown',function (event) {
+            g.keyDowns[event.key]=true;
+        });
+        window.addEventListener('keyup',function (event) {
+            g.keyDowns[event.key]=false;
+        });
+        g.registerAction=function (key,callback) {
+            g.actions[key] = callback;
+        }
+        //timer
+        setInterval(function () {
+            //event
+            var action = Object.keys(g.actions);
+          for(var i=0;i<action.length;i++){
+              var key = action[i];
+              if(g.keyDowns[key]){
+                  g.actions[key]();
+              }
+          }
+            //update
+            g.update();
+            //clear
+            g.clear();
+            //draw
+           g.draw();
+        },1000/60);
+        return g;
+    };
+    var isPathFrom = function (path) {
+        var img=new Image();
+        img.src = path;
+        return img;
+    };
+    var Pad = function () {
+        var image = isPathFrom('dangban.png');
+       var o ={
+           image : image,
+           x : 200,
+           y : 500,
+           speed : 15,
+       };
+       o.moveLeft=function () {
+           o.x -=o.speed;
+           if(o.x<0) o.x=0;
+       };
+       o.moveRight=function () {
+           o .x +=o.speed;
+           if(o.x>800-o.image.width) o.x=800-o.image.width;
+       };
+       o.collide=function(gimage){
+            if(gimage.x +gimage.image.width> o.x && gimage.x<o.x+o.image.width){
+                if(gimage.y>o.y && gimage.y<o.y+o.image.height){
+                    return true;
+                }
+            }
+        };
+       return o;
+    };
+    var Ball= function () {
+        var image = isPathFrom('yuan.png');
+        var o ={
+            image : image,
+            x : 100,
+            y : 400,
+            speedx : 10,
+            speedy : 10,
+            fried : false,
+        };
+        o.fire=function () {
+            o.fried=true;
+        };
+        o.move=function () {
+            if(o.fried){
+                if(o.x<0||o.x>800){
+                    o.speedx = -o.speedx;
+                }if(o.y<0){
+                    o.speedy= -o.speedy;
+
+                }
+                o.x +=o.speedx;
+                o.y +=o.speedy;
+            }if(o.y>600){
+                alert("Game Over");
+                location.replace(document.referrer);
+            }
+        };
+
+        return o;
+    };
+    var Brick= function () {
+        var image = isPathFrom('zhuan.jpg');
+        var o ={
+            image : image,
+            x : 100,
+            y : 50,
+            alive:true,
+        };
+        o.break=function (gimage) {
+
+            if(o.alive){
+                if(gimage.x +gimage.image.width> o.x && gimage.x<o.x+o.image.width){
+                    if(gimage.y>o.y && gimage.y<o.y+o.image.height){
+                        o.alive=false
+                        return true;
+                    }else {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return o;
+    };
+    var _main=function () {
+        var game =  Game();
+        var ball = Ball();
+        var pad = Pad();
+        var bricks = [];
+        for (var i=0;i<10;i++){
+            var b=new Brick();
+           if(i<=5){
+               b.x=i*80;
+           }
+            if(i>5){
+               b.x=i*80;
+                b.y=300;
+            }
+            bricks.push(b);
+        }
+        var count=0;
+        game.registerAction('a',function () {
+            pad.moveLeft();
+        });
+        game.registerAction('d',function () {
+            pad.moveRight();
+        });
+        game.registerAction('w',function () {
+            ball.fire();
+        });
+        game.update=function () {
+            ball.move();
+            //判断相撞
+            if(pad.collide(ball)){
+                ball.speedy*=-1;
+                console.log("碰挡板")
+            }
+            for (var i=0;i<bricks.length;i++){
+                var brick=bricks[i];
+                if(brick.break(ball)){
+                    ball.speedy*=-1;
+                    console.log("碰砖块");
+                    return count++;
+                }
+                console.log(count);
+                if(count==10){
+                    alert('通关了');
+                    windo
+                    return ;
+                }
+            }
+
+        };
+
+        game.draw=function () {
+            game.drawImaged(pad);
+            game.drawImaged(ball);
+            for (var i=0;i<bricks.length;i++){
+                var brick=bricks[i];
+                if(brick.alive) {
+                    game.drawImaged(brick);
+                }
+            }
+
+
+        }
+    };
+    _main();
+</script>
+</body>
+</html>
