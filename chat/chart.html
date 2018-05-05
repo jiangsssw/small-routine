@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>聊天室</title>
+</head>
+<style>
+    body{
+        background: #ECEDF1;
+    }
+    .content{
+        width: 760px;
+        position: relative;
+        border: solid 1px blue;
+        height: 500px;
+    }
+    .robot span{
+        list-style: none;
+        position: relative;
+        left: 15px;
+        top: 25px;
+        background-color: #FFFFFF;
+        border: solid 1px #2E1519;
+        border-radius: 20px;
+        font-size: 1.2em;
+        padding: 5px 10px 5px 10px;
+    }
+    .people{
+       position: relative;
+        left: 700px;
+    }
+    .people span{
+        position: relative;
+        list-style: none;
+        float: right;
+        border:solid 1px #12b7f5;
+        background-color:#12b7f5;
+        border-radius: 20px;
+        top: 60px;
+        font-size: 1.2em;
+        padding: 5px 10px 5px 10px;
+        right: 770px;
+    }
+    .input .shuru{
+        width: 700px;
+    }
+</style>
+<body>
+<div class="content">
+    <div class="robot">
+          <img src="pic/locn_pic.jpg">
+        <span>Hi,我是小图</span>
+    </div>
+</div>
+<div class="input">
+    <input class="shuru" type="text" placeholder="请输入信息！">
+    <input class="send" type="button" value="发送">
+</div>
+</body>
+<script>
+    document.querySelector('.shuru').onkeyup=function (event) {
+        if(event.keyCode==13&&event.target.value!=""){
+            console.log('促发了');
+            chatWithRobot();
+            event.target.value='';
+        }
+    };
+    document.querySelector('input[type=button]').onclick=function () {
+        chatWithRobot();
+        document.querySelector('.shuru').value='';
+    }
+    function chatWithRobot() {
+        var copy = document.querySelector('.content');
+        var value = document.querySelector('input[type=text]').value;
+        var li = document.createElement('span');
+        var people = document.createElement('div');
+        var robot = document.createElement('div');
+        var robot_lcon=document.createElement('img');
+        robot_lcon.setAttribute('src','pic/locn_pic.jpg');
+        var people_lcon=document.createElement('img');
+        people_lcon.setAttribute('src','pic/man_pic.png');
+        robot.setAttribute('class','robot');
+        people.setAttribute('class','people');
+        li.innerHTML=value;
+        people.appendChild(people_lcon);
+        people.appendChild(li);
+        copy.appendChild(people);
+        robot.appendChild(robot_lcon);
+        //创建一个异步XMLHttpRequest对象
+        var xhr = new XMLHttpRequest();
+        //请求行get or post
+        xhr.open('post','http://www.tuling123.com/openapi/api');
+        //请求头setrequestheader
+        xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+        //请求主体send()
+        xhr.send('key=7e8f2b9fb0644f41a590a09431aa5324&info='+value);
+        //异步回调函数，拿回服务器给的数据并包装一下，显示在浏览器上
+        xhr.onload=function () {
+            var herli=document.createElement('span');
+            var data = eval("(" + xhr.responseText + ")");
+            var text = data.text;
+            herli.innerHTML=text;
+            setTimeout(function () {
+                robot.appendChild(herli);
+                copy.appendChild(robot);
+            },2000)
+        }
+
+    }
+</script>
+</html>
